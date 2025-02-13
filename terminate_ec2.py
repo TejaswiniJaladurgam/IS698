@@ -4,7 +4,7 @@ import boto3
 ec2_client = boto3.client('ec2', region_name='us-east-1')  # Use your region
 
 # Replace with your instance ID
-instance_id = 'i-0b21f3d5acb1dbdce'  # Your EC2 instance ID
+instance_id = 'i-0bxxxxxxxxxxxe'  # Your EC2 instance ID
 
 # Stop and terminate the instance
 print(f"Stopping instance: {instance_id}")
