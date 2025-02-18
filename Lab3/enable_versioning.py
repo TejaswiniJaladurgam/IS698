@@ -1,7 +1,7 @@
 import boto3
 
 s3 = boto3.client('s3')
-bucket_name = 'my-boto3-s3-bucket-tejaswini'
+bucket_name = 'unique-bucket-name'
 
 s3.put_bucket_versioning(
     Bucket=bucket_name,
