@@ -1,7 +1,7 @@
 import boto3
 
 s3 = boto3.client('s3')
-bucket_name = 'my-boto3-s3-bucket-tejaswini'
+bucket_name = 'any-unique-name'
 file_name = 'myfile.txt'
 download_name = 'downloaded-file.txt'
 
