@@ -1,7 +1,7 @@
 import boto3
 
 s3 = boto3.client('s3')
-bucket_name = 'my-boto3-s3-bucket-tejaswini'  # Change this to match your bucket
+bucket_name = 'unique-bucket-name'  # Change this to match your bucket
 file_name = 'myfile.txt'
 
 with open(file_name, 'w') as f:
