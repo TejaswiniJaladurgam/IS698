@@ -2,9 +2,9 @@ import mysql.connector
 
 # Connect to RDS
 conn = mysql.connector.connect(
-    host="studentdb.ctuwqgkgatmu.us-east-1.rds.amazonaws.com",  # Replace with your RDS endpoint
-    user="admin",              # Your RDS username
-    password="Tejaswini123",  # Your RDS password
+    host="your end-point",  # Replace with your RDS endpoint
+    user="your-username",              # Your RDS username
+    password="your master password",  # Your RDS password
     database="University"      # The database you created
 )
 
