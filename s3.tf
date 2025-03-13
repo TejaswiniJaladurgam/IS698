@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "is698-terraform-s3bucket"  # Replace with a globally unique name
+  bucket = "<your-unique-bucket-name>"  # Replace with a globally unique name
 }
 
 resource "aws_s3_bucket_versioning" "versioning_example" {
