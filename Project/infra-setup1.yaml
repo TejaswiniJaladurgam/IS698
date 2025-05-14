@@ -15,7 +15,7 @@ Parameters:
 
   DBInstanceClass:
     Type: String
-    Default: "db.m5.large"  # Change to a supported class like db.m5.large
+    Default: "db.m5.large"
     AllowedValues:
       - "db.t3.micro"
       - "db.t3.small"
@@ -40,7 +40,6 @@ Parameters:
     Description: "The ID of the existing security group for EC2"
 
 Resources:
-  # RDS DB Subnet Group
   DBSubnetGroup:
     Type: "AWS::RDS::DBSubnetGroup"
     Properties:
@@ -55,21 +54,19 @@ Resources:
     Properties:
       DBInstanceIdentifier: !Ref DBInstanceIdentifier
       DBInstanceClass: !Ref DBInstanceClass
-      AllocatedStorage: "20"  # Minimum storage for db.m5.large
+      AllocatedStorage: "20"  
       Engine: "mysql"
-      EngineVersion: "8.0.33"  # Specify the appropriate MySQL version
+      EngineVersion: "8.0.33"  
       MasterUsername: !Ref DBUsername
       MasterUserPassword: !Ref DBPassword
-      MultiAZ: "true"  # Enable Multi-AZ for high availability
+      MultiAZ: "true"  
       VPCSecurityGroups:
-        - sg-0632d9454733bdb9a  # Replace with the actual security group ID you wish to use
+        - sg-0632d9454733bdb9a  
       DBSubnetGroupName: !Ref DBSubnetGroup
-      BackupRetentionPeriod: 7  # Retain backups for 7 days
-      PubliclyAccessible: "false"  # Set to true if you need the DB to be publicly accessible
+      BackupRetentionPeriod: 7  
+      PubliclyAccessible: "false"  
       ApplyImmediately: "true"
-      # Disable Performance Insights if not needed
-      # EnablePerformanceInsights: "true" 
-
+     
   # IAM Role for Lambda
   LambdaExecutionRole:
     Type: "AWS::IAM::Role"
@@ -118,11 +115,11 @@ Resources:
     Type: "AWS::EC2::Instance"
     Properties:
       InstanceType: "t2.micro"
-      ImageId: "ami-0f88e80871fd81e91"  # Replace with your AMI ID
-      SubnetId: !Ref PublicSubnetId  # Reference the existing public subnet
+      ImageId: "ami-0f88e80871fd81e91"  
+      SubnetId: !Ref PublicSubnetId  
       SecurityGroupIds:
-        - !Ref EC2SecurityGroupId  # Reference the existing security group
-      KeyName: "MyKeyPair"  # Replace with your EC2 key pair name
+        - !Ref EC2SecurityGroupId  
+      KeyName: "MyKeyPair"  
       Tags:
         - Key: "Name"
           Value: "MyWebServer"
