@@ -1,0 +1,136 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  VPCId:
+    Type: "AWS::EC2::VPC::Id"
+    Description: "The ID of the existing VPC"
+
+  PublicSubnetId:
+    Type: "AWS::EC2::Subnet::Id"
+    Description: "The ID of the existing public subnet"
+
+  PrivateSubnetId:
+    Type: "AWS::EC2::Subnet::Id"
+    Description: "The ID of the existing private subnet"
+
+  DBInstanceClass:
+    Type: String
+    Default: "db.m5.large"  # Change to a supported class like db.m5.large
+    AllowedValues:
+      - "db.t3.micro"
+      - "db.t3.small"
+      - "db.m5.large"
+    Description: "The DB instance class to use for the RDS instance."
+
+  DBInstanceIdentifier:
+    Type: String
+    Description: "The DB instance identifier."
+
+  DBUsername:
+    Type: String
+    Description: "The database admin username."
+
+  DBPassword:
+    Type: String
+    NoEcho: true
+    Description: "The database admin password."
+
+  EC2SecurityGroupId:
+    Type: "AWS::EC2::SecurityGroup::Id"
+    Description: "The ID of the existing security group for EC2"
+
+Resources:
+  # RDS DB Subnet Group
+  DBSubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties:
+      DBSubnetGroupDescription: "RDS DB Subnet Group"
+      SubnetIds:
+        - !Ref PublicSubnetId
+        - !Ref PrivateSubnetId
+
+  # RDS DB Instance
+  MyDBInstance:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      DBInstanceIdentifier: !Ref DBInstanceIdentifier
+      DBInstanceClass: !Ref DBInstanceClass
+      AllocatedStorage: "20"  # Minimum storage for db.m5.large
+      Engine: "mysql"
+      EngineVersion: "8.0.33"  # Specify the appropriate MySQL version
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      MultiAZ: "true"  # Enable Multi-AZ for high availability
+      VPCSecurityGroups:
+        - sg-0632d9454733bdb9a  # Replace with the actual security group ID you wish to use
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      BackupRetentionPeriod: 7  # Retain backups for 7 days
+      PubliclyAccessible: "false"  # Set to true if you need the DB to be publicly accessible
+      ApplyImmediately: "true"
+      # Disable Performance Insights if not needed
+      # EnablePerformanceInsights: "true" 
+
+  # IAM Role for Lambda
+  LambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action: "sts:AssumeRole"
+            Effect: "Allow"
+            Principal:
+              Service: "lambda.amazonaws.com"
+      Policies:
+        - PolicyName: "LambdaS3CloudWatchPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:*"
+                Resource: "arn:aws:logs:*:*:*"
+              - Effect: "Allow"
+                Action:
+                  - "s3:ListBucket"
+                  - "s3:GetObject"
+                Resource: 
+                  - "arn:aws:s3:::is698-s3bucket-infrastruture-099"
+                  - "arn:aws:s3:::is698-s3bucket-infrastruture-099/*"
+              - Effect: "Allow"
+                Action:
+                  - "s3:PutObject"
+                Resource: "arn:aws:s3:::is698-s3bucket-infrastruture-099/*"
+
+  # Lambda Function
+  LambdaFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: "lambda_function.lambda_handler"
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: "is698-s3bucket-infrastruture-099"
+        S3Key: "lambda.zip"
+      Runtime: "python3.9"
+
+  # EC2 Instance
+  EC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      InstanceType: "t2.micro"
+      ImageId: "ami-0f88e80871fd81e91"  # Replace with your AMI ID
+      SubnetId: !Ref PublicSubnetId  # Reference the existing public subnet
+      SecurityGroupIds:
+        - !Ref EC2SecurityGroupId  # Reference the existing security group
+      KeyName: "MyKeyPair"  # Replace with your EC2 key pair name
+      Tags:
+        - Key: "Name"
+          Value: "MyWebServer"
+
+Outputs:
+  DBInstanceIdentifier:
+    Description: "The DB instance identifier"
+    Value: !Ref MyDBInstance
+  DBInstanceEndpoint:
+    Description: "The endpoint address of the DB instance"
+    Value: !GetAtt MyDBInstance.Endpoint.Address
