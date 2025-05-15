@@ -1,9 +1,7 @@
 import boto3
 import json
-
 # Create a Lambda client
 lambda_client = boto3.client('lambda')
-
 # Define the payload (simulate an S3 event)
 payload = {
     "Records": [
@@ -19,14 +17,12 @@ payload = {
         }
     ]
 }
-
 # Invoke Lambda function
 response = lambda_client.invoke(
-    FunctionName='S3UploadLogger',  # Replace with your Lambda function name
-    InvocationType='RequestResponse',  # Synchronous invocation
-    Payload=json.dumps(payload)  # Pass the simulated S3 event as JSON
+    FunctionName='S3UploadLogger',  
+    InvocationType='RequestResponse',  
+    Payload=json.dumps(payload)  
 )
-
 # Read and print the response from Lambda
 response_payload = response['Payload'].read().decode("utf-8")
 print(response_payload)
