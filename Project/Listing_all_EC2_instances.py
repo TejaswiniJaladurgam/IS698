@@ -1,11 +1,8 @@
 import boto3
-
 # Create EC2 client
 ec2 = boto3.client('ec2')
-
 # Retrieve metadata for all instances
 response = ec2.describe_instances()
-
 # Print instance details
 for reservation in response['Reservations']:
     for instance in reservation['Instances']:
