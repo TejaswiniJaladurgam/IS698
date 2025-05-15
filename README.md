@@ -22,6 +22,7 @@ This project involves designing, implementing, and testing a cloud-based archite
 - **AWS VPC**: Virtual Private Cloud for networking.
 - **Terraform**: Infrastructure as code for managing AWS resources.
 - **Python Boto3**: AWS SDK for Python to interact with AWS services.
+- **AWS CLI**:A command-line tool for managing AWS resources.
 
   ## Conclusion
   This project demonstrates the power of Infrastructure as Code (IaC) with Terraform and CloudFormation, combined with AWS services like EC2, RDS, S3, and Lambda. It ensures scalable, secure, and automated deployment of infrastructure, making it easier to manage and replicate environments
