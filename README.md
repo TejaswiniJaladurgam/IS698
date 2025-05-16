@@ -4,7 +4,7 @@ This project involves designing, implementing, and testing a cloud-based archite
 
 ## **File Structure** (The files are located in the Project Directory)
 
-- **Terraform scripts**:  ALl the `.tf`  files contains the scripts to deploy the **VPC**, **subnets**, and **security groups**.
+- **Terraform scripts**:  The  `main.tf`  file contains the scripts to deploy the **VPC**, **subnets**, and **security groups**.
 
 - **CloudFormation Template**:   all the   `.yaml`  files contains the scripts to deploy **EC2 instances**, **RDS**, and **Lambda functions**.
 
