@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda + S3 bucket (no circular dependency)
+
+Resources:
+
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: my-logs-bucket-teja-2025
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: S3UploadLoggerRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaLogging
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+  S3UploadLogger:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: S3UploadLogger
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.9
+      Timeout: 30
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              print("New S3 upload detected")
+              print(event)
+              return {
+                  'statusCode': 200,
+                  'body': 'S3 event processed!'
+              }
+
+  PermissionForS3ToInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref S3UploadLogger
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceArn: !Sub arn:aws:s3:::my-logs-bucket-teja-2025

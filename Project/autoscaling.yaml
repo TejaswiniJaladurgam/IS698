@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EC2 Auto Scaling Group with Launch Template
+
+Parameters:
+  PublicSubnetId:
+    Type: String
+    Description: Public subnet to launch EC2 instances
+  EC2SecurityGroup:
+    Type: String
+    Description: Security Group ID for EC2
+  KeyName:
+    Type: String
+    Description: EC2 Key Pair
+
+Resources:
+
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: WebAppLaunchTemplate
+      LaunchTemplateData:
+        InstanceType: t2.micro
+        KeyName: !Ref KeyName
+        ImageId: ami-0953476d60561c955
+        SecurityGroupIds:
+          - !Ref EC2SecurityGroup
+        UserData:
+          Fn::Base64: |
+            #!/bin/bash
+            yum update -y
+            dnf install -y httpd php
+            systemctl start httpd
+            systemctl enable httpd
+            echo "<h1>Auto-Scaled EC2 Instance</h1>" > /var/www/html/index.html
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref PublicSubnetId
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      MinSize: 1
+      MaxSize: 2
+      DesiredCapacity: 1
+      Tags:
+        - Key: Name
+          Value: WebApp-ASG
+          PropagateAtLaunch: true
+
+  ScalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref AutoScalingGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 50.0

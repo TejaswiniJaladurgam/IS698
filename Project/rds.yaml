@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: RDS MySQL instance in private subnets
+
+Parameters:
+  VPCId:
+    Type: String
+  PrivateSubnetA:
+    Type: String
+  PrivateSubnetB:
+    Type: String
+  RDSSecurityGroup:
+    Type: String
+
+Resources:
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: "Subnets for RDS MySQL"
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+      DBSubnetGroupName: my-db-subnet-group
+
+  MyDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: my-db-instance
+      Engine: mysql
+      EngineVersion: 8.0.35
+      MasterUsername: admin
+      MasterUserPassword: MyPassword123!
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: 20
+      VPCSecurityGroups:
+        - !Ref RDSSecurityGroup
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      PubliclyAccessible: false
+      MultiAZ: false
+      DBName: mydatabase
+
+Outputs:
+  RDSInstanceEndpoint:
+    Description: Endpoint of the RDS instance
+    Value: !GetAtt MyDB.Endpoint.Address

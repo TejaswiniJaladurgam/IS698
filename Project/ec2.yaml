@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EC2 instance with Apache and PHP
+
+Parameters:
+  KeyName:
+    Type: String
+    Description: Name of an existing EC2 KeyPair to SSH into the instance
+
+  PublicSubnetId:
+    Type: String
+    Description: The subnet where EC2 will be launched (must be public)
+
+  EC2SecurityGroup:
+    Type: String
+    Description: Security Group ID for EC2 allowing HTTP and SSH
+
+Resources:
+  WebServerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName: !Ref KeyName
+      ImageId:  ami-0953476d60561c955
+      SubnetId: !Ref PublicSubnetId
+      SecurityGroupIds:
+        - !Ref EC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: PHP-WebServer
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd php
+          systemctl start httpd
+          systemctl enable httpd
+          echo "<?php phpinfo(); ?>" > /var/www/html/index.php
+
+Outputs:
+  InstancePublicIP:
+    Description: Public IP of the EC2 instance
+    Value: !GetAtt WebServerInstance.PublicIp
